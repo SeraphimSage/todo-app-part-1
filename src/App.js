@@ -2,9 +2,12 @@ import React, { Component } from "react";
 import "./index.css";
 import todosList from "./todos.json";
 
+// Brandi (SE Coach) Helped with troubleshooting handleDelete and removing some unnessecary placement of events
+
 class App extends Component {
 	state = {
-		todos: todosList
+		todos: todosList,
+		value: ""
 	};
 
 	handleAddToDo = event => {
@@ -22,7 +25,7 @@ class App extends Component {
 		}
 	};
 
-	handleToggleComplete = (event, todoIdToToggle) => {
+	handleToggleComplete = todoIdToToggle => event => {
 		const newTodos = this.state.todos.slice();
 		const newNewTodos = newTodos.map(todo => {
 			if (todo.id === todoIdToToggle) {
@@ -30,31 +33,66 @@ class App extends Component {
 			}
 			return todo;
 		});
-		this.setState({ todo: newNewTodos });
+		this.setState({ todos: newNewTodos });
+	};
+
+	handleDelete = todosId => {
+		const newTodos = this.state.todos.filter(todo => {
+			if (todo.id === todosId) {
+				return false;
+			}
+			return true;
+		});
+		this.setState({ todos: newTodos });
+	};
+
+	handleChange = event => {
+		this.setState({ value: event.target.value });
+	};
+
+	handleDeleteComplete = todoComplete => event => {
+		const newTodos = this.state.todos.slice();
+		const newNewTodos = newTodos.map(todo => {
+			if (todo.completed === true) {
+				return false;
+			}
+			return true;
+		});
+		this.setState({ todos: newNewTodos });
 	};
 	render() {
 		return (
-			<section className="todoapp">
-				<header className="header">
-					<h1>todos</h1>
-					<input
-						className="new-todo"
-						placeholder="What needs to be done?"
-						onKeyDown={this.handleAddToDo}
-						autofocus
+			<React.Fragment>
+				<section className="todoapp">
+					<header className="header">
+						<h1>todos</h1>
+						<input
+							className="new-todo"
+							placeholder="What needs to be done?"
+							onKeyDown={this.handleAddToDo}
+							autoFocus
+							onChange={this.handleChange}
+							value={this.state.value}
+						/>
+					</header>
+					<TodoList
+						todos={this.state.todos}
+						handleToggleComplete={this.handleToggleComplete}
+						handleDelete={this.handleDelete}
 					/>
-				</header>
-				<TodoList
-					todos={this.state.todos}
-					handleToggleComplete={this.handleToggleComplete}
-				/>
-				<footer className="footer">
-					<span className="todo-count">
-						<strong>0</strong> item(s) left
-					</span>
-					<button className="clear-completed">Clear completed</button>
-				</footer>
-			</section>
+					<footer className="footer">
+						<span className="todo-count">
+							<strong>0</strong> item(s) left
+						</span>
+						<button
+							className="clear-completed"
+							onClick={this.props.handleDeleteComplete}
+						>
+							Clear completed
+						</button>
+					</footer>
+				</section>
+			</React.Fragment>
 		);
 	}
 }
@@ -68,12 +106,10 @@ class TodoItem extends Component {
 						className="toggle"
 						type="checkbox"
 						checked={this.props.completed}
-						onChange={event =>
-							this.props.handleToggleComplete(event, this.props.id)
-						}
+						onChange={this.props.handleToggleComplete}
 					/>
 					<label>{this.props.title}</label>
-					<button className="destroy" />
+					<button className="destroy" onClick={this.props.handleDelete} />
 				</div>
 			</li>
 		);
@@ -87,10 +123,12 @@ class TodoList extends Component {
 				<ul className="todo-list">
 					{this.props.todos.map(todo => (
 						<TodoItem
+							key={todo.id}
 							title={todo.title}
 							completed={todo.completed}
 							id={todo.id}
-							handleToggleComplete={this.props.handleToggleComplete}
+							handleToggleComplete={this.props.handleToggleComplete(todo.id)}
+							handleDelete={event => this.props.handleDelete(todo.id)}
 						/>
 					))}
 				</ul>
