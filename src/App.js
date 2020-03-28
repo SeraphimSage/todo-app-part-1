@@ -50,15 +50,10 @@ class App extends Component {
     this.setState({ value: event.target.value });
   };
 
-  handleDeleteComplete = todoComplete => event => {
-    const newTodos = this.state.todos.slice();
-    const newNewTodos = newTodos.map(todo => {
-      if (todo.completed === true) {
-        return false;
-      }
-      return true;
-    });
-    this.setState({ todos: newNewTodos });
+  handleDeleteComplete = event => {
+    const newTodos = this.state.todos.filter(todo => todo.completed === false);
+
+    this.setState({ todos: newTodos });
   };
   render() {
     return (
@@ -66,6 +61,7 @@ class App extends Component {
         <section className="todoapp">
           <header className="header">
             <h1>todos</h1>
+            {console.log(this)}
             <input
               className="new-todo"
               placeholder="What needs to be done?"
@@ -86,7 +82,7 @@ class App extends Component {
             </span>
             <button
               className="clear-completed"
-              onClick={this.props.handleDeleteComplete}
+              onClick={this.handleDeleteComplete}
             >
               Clear completed
             </button>
